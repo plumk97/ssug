@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"ssug/internal/utils"
 	"ssug/modules/base"
 	"ssug/modules/data"
@@ -21,13 +20,13 @@ func AddMappingHandler(originalURLs []string) ([]data.Mapping, error) {
 		if ok {
 			m, _ := data.Redirect.GetMappingFO(originalURL)
 			mappings = append(mappings, m)
-			utils.Logger.Info(fmt.Sprintf("添加映射%s -> %s失败，映射已存在", m.ShortURL, m.OriginalURL))
+			// utils.Logger.Info(fmt.Sprintf("添加映射%s -> %s失败，映射已存在", m.ShortURL, m.OriginalURL))
 			// return m, errors.New("添加失败，映射已存在")
 		} else {
 			shortURL := base.GenValue(originalURL)
 			m, err := data.Redirect.AddMapping(originalURL, shortURL)
 			if err == nil {
-				utils.Logger.Info(fmt.Sprintf("成功添加映射%s -> %s", m.ShortURL, m.OriginalURL))
+				// utils.Logger.Info(fmt.Sprintf("成功添加映射%s -> %s", m.ShortURL, m.OriginalURL))
 				mappings = append(mappings, m)
 				// return m, nil
 			} else {
