@@ -9,25 +9,35 @@ import (
 )
 
 // AddMappingHandler 处理添加短链请求
-func AddMappingHandler(originalURL string) (data.Mapping, error) {
-	if !utils.IsURL(originalURL) {
-		return data.Mapping{}, errors.New("添加映射失败，URL非法")
+func AddMappingHandler(originalURLs []string) ([]data.Mapping, error) {
+
+	var mappings []data.Mapping
+	for _, originalURL := range originalURLs {
+		if !utils.IsURL(originalURL) {
+			return nil, errors.New("添加映射失败，URL非法")
+		}
+
+		ok := data.Redirect.HasOriginalURL(originalURL)
+		if ok {
+			m, _ := data.Redirect.GetMappingFO(originalURL)
+			mappings = append(mappings, m)
+			utils.Logger.Info(fmt.Sprintf("添加映射%s -> %s失败，映射已存在", m.ShortURL, m.OriginalURL))
+			// return m, errors.New("添加失败，映射已存在")
+		} else {
+			shortURL := base.GenValue(originalURL)
+			m, err := data.Redirect.AddMapping(originalURL, shortURL)
+			if err == nil {
+				utils.Logger.Info(fmt.Sprintf("成功添加映射%s -> %s", m.ShortURL, m.OriginalURL))
+				mappings = append(mappings, m)
+				// return m, nil
+			} else {
+				utils.Logger.Warning(err)
+				return nil, err
+			}
+		}
+
 	}
-	ok := data.Redirect.HasOriginalURL(originalURL)
-	if ok {
-		m, _ := data.Redirect.GetMappingFO(originalURL)
-		utils.Logger.Info(fmt.Sprintf("添加映射%s -> %s失败，映射已存在", m.ShortURL, m.OriginalURL))
-		return m, errors.New("添加失败，映射已存在")
-	}
-	shortURL := base.GenValue(originalURL)
-	m, err := data.Redirect.AddMapping(originalURL, shortURL)
-	if err == nil {
-		utils.Logger.Info(fmt.Sprintf("成功添加映射%s -> %s", m.ShortURL, m.OriginalURL))
-		return m, nil
-	} else {
-		utils.Logger.Warning(err)
-		return data.Mapping{}, err
-	}
+	return mappings, nil
 }
 
 // GetMappingHandler 处理原始链接获取请求

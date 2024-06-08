@@ -1,10 +1,12 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"ssug/internal/utils"
 	"ssug/modules/data"
 	"ssug/modules/handlers"
+	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func AddMapping(c *gin.Context) {
@@ -14,8 +16,9 @@ func AddMapping(c *gin.Context) {
 		return
 	}
 
-	originalURL := c.DefaultPostForm("url", "")
-	v, err := handlers.AddMappingHandler(originalURL)
+	url := c.DefaultPostForm("url", "")
+	urls := strings.Split(url, ",")
+	v, err := handlers.AddMappingHandler(urls)
 	if err != nil {
 		c.JSON(403, utils.ResultFailWD(403, err.Error(), v))
 	} else {
